@@ -1,0 +1,7 @@
+services:
+  k8s-demo:
+    container_name: k8s-demo
+    image: alleninnz/k8s-demo:latest
+    restart: always
+    ports:
+      - "8080:8080"
