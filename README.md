@@ -62,11 +62,13 @@ Kubernetes 提供了自动水平扩展（Horizontal Pod Autoscaling，HPA）功�
 监视和调整：
 一旦创建了 HPA 对象，Kubernetes 将会自动监视和调整 Pod 的副本数量，以满足你配置的触发条件。HPA 将定期检查指标服务器收集到的指标数据，并根据触发条件来调整 Pod 的副本数量。
 
-## 安装metrics server
+列出当前的 HPA 对象：kubectl get hpa
+删除HPA对象：kubectl delete hpa <hpa名称>
 
-### 使用addons
+## 使用addons
 
 minikube addons enable metrics-server
+minikube addons enable ingress-nginx
 
 ### 手动安装
 
@@ -81,10 +83,6 @@ kubectl apply -f components.yaml
 ### 查看指标
 
 kubectl top pod
-
-列出当前的 HPA 对象：kubectl get hpa
-删除HPA对象：kubectl delete hpa <hpa名称>
-
 
 ## ~~helm安装Ingress~~
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
@@ -107,7 +105,7 @@ service:
 admissionWebhooks:
    enabled: false
 
-节点上打上标签： kubectl label node minikube ingress=true
+`节点上打上标签`： kubectl label node minikube ingress=true
 
 helm install ingress-nginx -n ingress-nginx .
 
@@ -125,5 +123,5 @@ helm install ingress-nginx -n ingress-nginx .
     1. minikube addons enable ingress
     2. kubectl apply -f ingress-nginx.yml
     3. minikube tunnel 开启ip隧道
-    4. curl --resolve "hello-world.info:80:127.0.0.1" -i http://hello-world.info
-    5. Or add a line to the bottom of the /etc/hosts file on your computer 127.0.0.1 hello-world.info curl -i http://hello-world.info
+    4. curl --resolve "hello-k8s.info:80:127.0.0.1" -i http://hello-k8s.info/app/hello
+    5. Or add a line to the bottom of the /etc/hosts file on your computer 127.0.0.1 hello-k8s.info curl -i http://hello-k8s.info.info/app/hello 测试HPA：while true; do curl http://hello-k8s.info/app/hello >/dev/null 2>&1; done

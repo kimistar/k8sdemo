@@ -27,10 +27,10 @@ spec:
           imagePullPolicy: IfNotPresent
           resources:
             requests:
-              cpu: 100m
+              cpu: 10m
               memory: 100Mi
             limits:
-              cpu: 300m
+              cpu: 50m
               memory: 200Mi
           livenessProbe:
             httpGet:
@@ -51,6 +51,30 @@ spec:
           hostPath:
             path: /usr/share/zoneinfo/Asia/Shanghai
       restartPolicy: Always
+
+# HPA
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: k8s-demo-hpa
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: k8s-demo
+  minReplicas: 1 # 最小副本数
+  maxReplicas: 10 # 最大副本数
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 50 # 目标 CPU 使用率百分比为 50%
+
+# Service
 ---
 apiVersion: v1
 kind: Service
@@ -70,4 +94,3 @@ spec:
       targetPort: 8080
       nodePort: 30080
   type: NodePort
-
