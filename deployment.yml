@@ -21,6 +21,7 @@ spec:
       labels:
         app: k8s-demo
     spec:
+      restartPolicy: Always
       containers:
         - name: k8s-demo
           image: alleninnz/k8s-demo:latest
@@ -46,11 +47,15 @@ spec:
           volumeMounts:
             - name: localtime
               mountPath: /etc/localtime
+            - name: k8s-demo-pvc
+              mountPath: /data
       volumes:
         - name: localtime
           hostPath:
             path: /usr/share/zoneinfo/Asia/Shanghai
-      restartPolicy: Always
+        - name: k8s-demo-pvc
+          persistentVolumeClaim:
+            claimName: k8s-demo-pvc
 
 # HPA
 ---

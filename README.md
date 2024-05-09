@@ -110,6 +110,82 @@ admissionWebhooks:
 helm install ingress-nginx -n ingress-nginx .
 
 
+## 运行NFS
+
+docker run -d --name nfs-server \
+    --privileged \
+    --restart=always \
+    -v /data/nfs:/nfsshare \
+    -e SHARED_DIRECTORY=/nfsshare \
+    -e SYNC=true \
+    -p 2049:2049 \
+    itsthenetwork/nfs-server-alpine:latest
+
+docker exec -it <containerName> /bin/bash
+
+### K8S NFS示例
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nfs-server
+spec:
+  containers:
+  - name: nfs-server
+    image: itsthenetwork/nfs-server-alpine:latest
+    securityContext:
+      privileged: true
+    env:
+    - name: SHARED_DIRECTORY
+      value: "/nfsshare"
+    - name: SYNC
+      value: "true"
+    volumeMounts:
+    - name: nfs-share
+      mountPath: /nfsshare
+  volumes:
+  - name: nfs-share
+    hostPath:
+      path: /path/to/nfs/share
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nfs-service
+spec:
+  selector:
+    pod: nfs-server
+  ports:
+    - protocol: TCP
+      port: 2049
+      targetPort: 2049
+
+```
+
+## ubuntu install NFS
+
+apt install nfs-kernel-server
+
+vim /etc/exports
+
+/path/to/share *(rw,sync,no_subtree_check,no_root_squash,insecure)
+
+exportfs -ra
+
+systemctl start nfs-kernel-server
+
+挂载 mount -t nfs xx.xx.xx.xx:/data/nfs ./nfs
+
+umount /mnt/nfs
+
+## helm安装 nfs provisioner
+
+helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
+    --set nfs.server=xx.xx.xx.xx \
+    --set nfs.path=/data/nfs
+
 ## 其他
 如果希望能够通过本地 IP 地址和端口访问 Kubernetes 服务，有几种方法可以实现：
 
