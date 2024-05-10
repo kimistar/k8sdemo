@@ -125,7 +125,7 @@ docker exec -it <containerName> /bin/bash
 
 ### K8S NFS示例
 
-```
+```yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -182,6 +182,7 @@ umount /mnt/nfs
 ## helm安装 nfs provisioner
 
 helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+
 helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
     --set nfs.server=xx.xx.xx.xx \
     --set nfs.path=/data/nfs
@@ -201,3 +202,64 @@ helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs
     3. minikube tunnel 开启ip隧道
     4. curl --resolve "hello-k8s.info:80:127.0.0.1" -i http://hello-k8s.info/app/hello
     5. Or add a line to the bottom of the /etc/hosts file on your computer 127.0.0.1 hello-k8s.info curl -i http://hello-k8s.info.info/app/hello 测试HPA：while true; do curl http://hello-k8s.info/app/hello >/dev/null 2>&1; done
+
+### Pod调度
+
+1. 调度约束（Scheduling Constraints） 例如
+
+2. 节点选择器
+
+节点标签：
+* 节点1：拥有标签 zone=us-west
+* 节点2：拥有标签 zone=us-east
+* 节点3：拥有标签 zone=eu-central
+
+示例
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example-pod
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+  nodeSelector:   # 节点选择器
+    zone: us-west   # 选择具有标签 zone=us-west 的节点
+  resources:   # 资源限制
+    limits:
+      cpu: "500m"   # CPU 限制为 0.5 核
+      memory: "256Mi"   # 内存 限制为 256Mi
+
+```
+
+3. 亲和力与反亲和力
+4. 污点和容忍
+
+示例
+
+假设我们有一个 Kubernetes 集群，其中一个节点（node-1）上有一个污点 special=true:NoSchedule (NoSchedule/PreferNoSchedule/NoExecute)，表示这个节点是一个特殊节点，不希望调度一般的 Pod 
+
+打上污点
+
+```
+kubectl taint nodes node-1 special=true:NoSchedule
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: special-pod
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+  tolerations:   # 容忍
+  - key: "special"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+
+```
