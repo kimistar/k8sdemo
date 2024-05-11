@@ -187,6 +187,11 @@ helm install nfs-subdir-external-provisioner nfs-subdir-external-provisioner/nfs
     --set nfs.server=xx.xx.xx.xx \
     --set nfs.path=/data/nfs
 
+### helm仓库
+
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo add azure http://mirror.azure.cn/kubernetes/charts
+
 ## 其他
 如果希望能够通过本地 IP 地址和端口访问 Kubernetes 服务，有几种方法可以实现：
 
